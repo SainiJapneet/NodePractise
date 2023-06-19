@@ -1,6 +1,6 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
+const jwt = require("jsonwebtoken");
 
 //we will use this to hash the password that we recieve from users
 
@@ -36,6 +36,8 @@ app.get('/', (request, response, next) => {
     next();
 })
 
+
+
 //register endpoint
 
 //.then ,  .catch, .finally
@@ -46,7 +48,7 @@ app.post("/register", (request, response) => {
 
     bcrypt.hash(request.body.password, 10)
         .then((hashedPassword) => {
-            console.log(hashedPassword)
+            console.log('hashedPassword', hashedPassword)
 
             //create a new user instance and collect the data
             const user = new User({
@@ -81,80 +83,56 @@ app.post("/register", (request, response) => {
 
 })
 
+
 //login endoint
 
 app.post("/login", (request, response) => {
-
-    //check if the email that user enters on login exists
+    //check if the email tha user enters omn login exists or not
 
     User.findOne({ email: request.body.email })
-        //if email exists
         .then((user) => {
-            //compare the password entered by user and the hashed password found in the db
             console.log(user)
-            // console.log({ loginPassword: request.body.password, hashedPassword: user.password })
-            bcrypt.compare(request.body.password, user.password)
-                //check if password matches
 
+            bcrypt.compare(request.body.password, user.password)
                 .then((passwordCheck) => {
-                    console.log('passwordCheck', passwordCheck)
+                    console.log(passwordCheck)
 
                     if (!passwordCheck) {
                         return response.status(400).send({
-                            message: "Passwords do not match"
-
+                            message: 'Passwords do not match'
                         })
                     }
 
-                    //create jwt token
-
+                    // create a jwt token
                     const token = jwt.sign({
                         userId: user._id,
                         userEmail: user.email
-                    }, "RANDOM-TOKEN", { expiresIn: '24h' }
-                    )
+                    }, "RANDOM-TOKEN", { expiresIn: "24h" })
 
-                    //return the success response
+                    //return a success response
 
                     response.status(200).send({
-                        message: 'Login Successfull',
+                        message: "Login is successsfull",
                         email: user.email,
-                        token
+                        token,
                     })
-
-
-
                 })
-                //catch error if password do not match
-                .catch((error) => {
+                .catch(err => {
                     response.status(400).send({
                         message: 'Passwords do not match',
-                        error
+                        err
                     })
                 })
 
-
-
-        }).catch((error) => {
-            console.log(error);
+        })
+        .catch((err) => {
             response.status(404).send({
                 message: "Email not found",
-                error
+                err
             })
         })
 
 })
-
-//register endpoint
-//hash password
-//salt techniques
-
-
-//get => reading the data for ex list of users
-//post => adding a new resource for ex adding a new user
-//put => updating a resource for ex updating the email or password of existing user
-//delete => deleting the resource for ex deleting the user
-
 
 
 
